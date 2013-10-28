@@ -54,11 +54,25 @@ public class SINumber
         return unit.symbol + "=" + Data.twoDForm.format(value) + " " + prefix.name + unit.name;
     }
 
+    @Override
+    public boolean equals(Object o)
+    {
+        if (!(o instanceof SINumber)) return false;
+        SINumber n = (SINumber) o;
+        return n.unit == this.unit && n.getValue() == this.getValue();
+    }
+
     /**
      * @return The ACTUAL value. Including the prefix.
      */
     public float getValue()
     {
         return value * prefix.value;
+    }
+
+    @Override
+    public SINumber clone()
+    {
+        return new SINumber(unit, value, prefix);
     }
 }
