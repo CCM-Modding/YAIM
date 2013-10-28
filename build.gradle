@@ -1,0 +1,47 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+		classpath 'com.github.abrarsyed.gmcp:GMCP:latest.integration'
+    }
+}
+
+apply plugin: "gmcp"
+
+group = 'ccm.yaim'
+version = "0.1"
+archivesBaseName = 'YAIM'
+minecraft {
+	minecraftVersion = "1.6.4"
+}
+
+processResources
+{
+    from(sourceSets.main.resources.srcDirs) {
+        include '**/*.lang'
+        include '**/*.info'
+        
+        expand 'version':project.version, 'mcversion':project.minecraft.minecraftVersion
+    }
+    
+    from(sourceSets.main.resources.srcDirs) {
+        exclude '**/*.lang'
+        exclude '**/*.info'
+    }
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allSource
+    appendix = 'src'
+}
+
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    appendix = 'deobf'
+}
+
+artifacts {
+    archives sourceJar
+    archives deobfJar
+}
