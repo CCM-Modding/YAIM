@@ -7,7 +7,6 @@ package ccm.yaim.util;
  */
 public class TheMetricSystem
 {
-
     public static enum Unit
     {
         UNKNOWN("", "x"),
