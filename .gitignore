@@ -1,6 +1,3 @@
-out/
-mcp/
-
 ############
 # Java
 ############
@@ -83,6 +80,8 @@ Icon
 # Minecraft
 ############
 minecraft/
+out/
+mcp/
 
 ############
 # Gradle
