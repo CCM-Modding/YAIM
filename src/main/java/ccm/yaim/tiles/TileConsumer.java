@@ -5,14 +5,17 @@ import ccm.yaim.parts.IPowerConsumer;
 import ccm.yaim.util.SINumber;
 import net.minecraft.world.World;
 
-import static ccm.yaim.util.TheMetricSystem.Unit.POWERFACTOR;
+import static ccm.yaim.util.TheMetricSystem.Unit.POWER;
 import static ccm.yaim.util.TheMetricSystem.Unit.RESISTANCE;
 
 public class TileConsumer extends TileNetworkPart implements IPowerConsumer
 {
     private INetwork network;
 
-    public TileConsumer() {super();}
+    public TileConsumer()
+    {
+        super();
+    }
 
     public TileConsumer(World world)
     {
@@ -20,20 +23,26 @@ public class TileConsumer extends TileNetworkPart implements IPowerConsumer
     }
 
     @Override
-    public SINumber getResistance()
+    public void usePower(SINumber power)
     {
-        return new SINumber(RESISTANCE, 250);
+        System.out.println(this.toString() + " consumed " + power.toString());
     }
 
     @Override
-    public SINumber getPowerFactor()
+    public SINumber getPowerRequirement()
     {
-        return new SINumber(POWERFACTOR, 1);
+        return new SINumber(POWER, 100);
     }
 
     @Override
-    public void usePower(SINumber voltage, SINumber amps)
+    public byte getConsumerPriority()
     {
-        System.out.println(this.toString() + " consumed " + amps.toString() + " at " + voltage.toString());
+        return Byte.MIN_VALUE;
+    }
+
+    @Override
+    public int compareTo(IPowerConsumer o)
+    {
+        return getConsumerPriority() - o.getConsumerPriority();
     }
 }

@@ -10,6 +10,7 @@ public class BlockConsumer extends BlockNetworkPart
     public BlockConsumer(int par1, Material par2Material)
     {
         super(par1, par2Material);
+        this.setUnlocalizedName("consumer");
     }
 
     @Override

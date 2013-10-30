@@ -10,6 +10,7 @@ public class BlockCable extends BlockNetworkPart
     public BlockCable(int par1, Material par2Material)
     {
         super(par1, par2Material);
+        this.setUnlocalizedName("cable");
     }
 
     @Override

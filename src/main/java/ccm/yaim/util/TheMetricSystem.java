@@ -12,8 +12,7 @@ public class TheMetricSystem
         UNKNOWN("", "x"),
         CURRENT("Amp", "I"), VOLTAGE("Volt", "U"), RESISTANCE("Ohm", "Z"),
         ENERGY("Joule", "E"),
-        REAL_POWER("Watt", "P"), APPARENT_POWER("VA", "S"), REACTIVE_POWER("VAr", "Q"),
-        POWERFACTOR("", "PF"),
+        POWER("Watt", "P"),
         TEMPERATURE("°C", "T"),
         LENGHT("m", "l"), AREA("m²", "A"), VOLUME("m³", "V");
 

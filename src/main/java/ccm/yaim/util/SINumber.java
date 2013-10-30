@@ -54,12 +54,17 @@ public class SINumber
         return unit.symbol + "=" + Data.twoDForm.format(value) + " " + prefix.name + unit.name;
     }
 
+    public boolean equals(SINumber n)
+    {
+        if (n == null) return false;
+        return n.unit == this.unit && n.getValue() == this.getValue();
+    }
+
     @Override
     public boolean equals(Object o)
     {
         if (!(o instanceof SINumber)) return false;
-        SINumber n = (SINumber) o;
-        return n.unit == this.unit && n.getValue() == this.getValue();
+        return equals((SINumber) o);
     }
 
     /**
@@ -74,5 +79,10 @@ public class SINumber
     public SINumber clone()
     {
         return new SINumber(unit, value, prefix);
+    }
+
+    public SINumber subtract(float f)
+    {
+        return SINumber.getMostAppropriate(this.unit, getValue() - f);
     }
 }

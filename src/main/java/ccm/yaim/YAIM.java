@@ -3,6 +3,7 @@ package ccm.yaim;
 import ccm.yaim.block.BlockCable;
 import ccm.yaim.block.BlockConsumer;
 import ccm.yaim.block.BlockProvider;
+import ccm.yaim.network.NetworkTicker;
 import ccm.yaim.tiles.TileCable;
 import ccm.yaim.tiles.TileConsumer;
 import ccm.yaim.tiles.TileProvider;
@@ -11,6 +12,9 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.registry.LanguageRegistry;
+import cpw.mods.fml.common.registry.TickRegistry;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 
@@ -34,6 +38,11 @@ public class YAIM
         GameRegistry.registerBlock(blockCable, "CABLE");
         GameRegistry.registerBlock(blockConsumer, "CONSUMER");
         GameRegistry.registerBlock(blockProvider, "PROVIDER");
+
+        LanguageRegistry.addName(blockCable, "Cable");
+        LanguageRegistry.addName(blockConsumer, "Consumer");
+        LanguageRegistry.addName(blockProvider, "Provider");
+
     }
 
     @Mod.EventHandler
@@ -42,5 +51,7 @@ public class YAIM
         GameRegistry.registerTileEntity(TileCable.class, Data.MODID + ".CABLE");
         GameRegistry.registerTileEntity(TileConsumer.class, Data.MODID + ".CONSUMER");
         GameRegistry.registerTileEntity(TileProvider.class, Data.MODID + ".PROVIDER");
+
+        TickRegistry.registerTickHandler(NetworkTicker.INSTANCE, Side.SERVER);
     }
 }

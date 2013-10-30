@@ -4,14 +4,15 @@ import ccm.yaim.parts.IConductor;
 import ccm.yaim.parts.INetworkPart;
 import ccm.yaim.parts.IPowerConsumer;
 import ccm.yaim.parts.IPowerProvider;
+import ccm.yaim.util.ElectricHelper;
 import ccm.yaim.util.SINumber;
-import codechicken.lib.vec.BlockCoord;
+import ccm.yaim.util.TheMetricSystem;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.TreeMultimap;
 import net.minecraft.block.Block;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class PowerNetwork implements INetwork
 {
@@ -25,13 +26,15 @@ public class PowerNetwork implements INetwork
 
     public PowerNetwork(World world)
     {
+        this.voltage = new SINumber(TheMetricSystem.Unit.VOLTAGE, 0);
         this.world = world;
+        NetworkTicker.INSTANCE.addNetwork(this);
     }
 
     @Override
-    public void tick()
+    public Set<INetworkPart> getParts()
     {
-
+        return parts;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class PowerNetwork implements INetwork
 
     public SINumber getVoltage()
     {
-        return voltage;
+        return voltage.clone();
     }
 
     @Override
@@ -64,22 +67,63 @@ public class PowerNetwork implements INetwork
     }
 
     @Override
-    public void refresh(INetworkPart part)
+    public void merge(INetwork network)
     {
+        if (network != null && network != this)
+        {
+            PowerNetwork newNetwork = new PowerNetwork(world);
+            newNetwork.getParts().addAll(this.getParts());
+            newNetwork.getParts().addAll(network.getParts());
+
+            newNetwork.refresh();
+        }
+    }
+
+    @Override
+    public void remove(INetworkPart part)
+    {
+        parts.remove(part);
+        conductors.remove(part);
+        providers.remove(part);
+        consumers.remove(part);
+
+        if (parts.isEmpty())
+            NetworkTicker.INSTANCE.removeNetwork(this);
+    }
+
+    @Override
+    public void refresh()
+    {
+        if (world.isRemote) return;
+        System.out.println("Refresh " + parts.size());
         conductors.clear();
         providers.clear();
         consumers.clear();
 
-        parts.add(part);
-        checkNeighbours(new BlockCoord(part.getTE()));
+        HashSet<INetworkPart> tempParts = new HashSet<INetworkPart>();
+        Iterator<INetworkPart> it = parts.iterator();
 
-        for (INetworkPart part1 : parts)
+        while (it.hasNext())
         {
-            part1.setNetwork(this);
-            if (part1 instanceof IConductor) conductors.add((IConductor) part1);
-            if (part1 instanceof IPowerProvider) providers.add((IPowerProvider) part1);
-            if (part1 instanceof IPowerConsumer) consumers.add((IPowerConsumer) part1);
+            INetworkPart part = it.next();
+
+            if (part == null) it.remove();
+            else if (part.getTE().isInvalid()) it.remove();
+            else
+            {
+                tempParts.add(part);
+                for (INetworkPart part1 : part.getAdjacentParts())
+                {
+                    if (part1 != null)
+                    {
+                        tempParts.add(part1);
+                    }
+                }
+            }
         }
+
+        parts.clear();
+        addAll(tempParts);
 
         for (IPowerProvider provider : providers)
         {
@@ -90,25 +134,81 @@ public class PowerNetwork implements INetwork
                     voltage = provider.getVoltage().clone();
             }
         }
+
+        if (parts.isEmpty())
+            NetworkTicker.INSTANCE.removeNetwork(this);
     }
 
-    private void checkNeighbours(BlockCoord coord)
+    public void addAll(Collection<INetworkPart> partsToAdd)
     {
-        for (int side = 0; side < 6; side++)
+        for (INetworkPart part : partsToAdd)
         {
-            BlockCoord coord1 = coord.copy().offset(side);
+            world.setBlock(part.getTE().xCoord, part.getTE().yCoord + 5, part.getTE().zCoord, Block.glowStone.blockID);
+            add(part);
+        }
+    }
 
-            TileEntity te = world.getBlockTileEntity(coord1.x, coord1.y, coord1.z);
+    @Override
+    public void add(INetworkPart part)
+    {
+        parts.add(part);
+        part.setNetwork(this);
+        if (part instanceof IConductor) conductors.add((IConductor) part);
+        if (part instanceof IPowerProvider) providers.add((IPowerProvider) part);
+        if (part instanceof IPowerConsumer) consumers.add((IPowerConsumer) part);
+    }
 
-            if (te instanceof INetworkPart)
+    public void tick()
+    {
+        SINumber maxProvided = new SINumber(TheMetricSystem.Unit.POWER, 0);
+        ArrayList<IPowerProvider> usefullProviders = new ArrayList<IPowerProvider>();
+        for (IPowerProvider provider : providers)
+        {
+            if (provider.getVoltage().equals(getVoltage()))
             {
-                if (!parts.contains(te))
-                {
-                    parts.add((INetworkPart) te);
-                    world.setBlock(coord1.x, coord1.y + 10, coord1.z, Block.glowStone.blockID); //TODO: DEBUG LINE
-                    checkNeighbours(coord1);
-                }
+                usefullProviders.add(provider);
             }
         }
+        Collections.sort(usefullProviders);
+        ArrayList<IPowerConsumer> requests = new ArrayList<IPowerConsumer>();
+        requests.addAll(consumers);
+        Collections.sort(requests);
+
+        Iterator<IPowerProvider> providerIterator = usefullProviders.iterator();
+        Iterator<IPowerConsumer> requestIterator = requests.iterator();
+
+        if (!providerIterator.hasNext()) return;
+        IPowerProvider provider = providerIterator.next();
+        SINumber maxPower = provider.getMaxPower().clone();
+        float powerLeftInProvider = maxPower.getValue();
+
+        while (requestIterator.hasNext())
+        {
+            IPowerConsumer request = requestIterator.next();
+            SINumber requestedPower = request.getPowerRequirement().clone();
+            float powerLeftInReqest = requestedPower.getValue();
+            while (powerLeftInReqest > 0)
+            {
+                if (powerLeftInReqest <= powerLeftInProvider)
+                {
+                    powerLeftInProvider -= powerLeftInReqest;
+                    powerLeftInReqest = 0;
+                }
+                else
+                {
+                    powerLeftInReqest -= powerLeftInProvider;
+                    provider.providePower(maxPower);
+
+                    if (!providerIterator.hasNext()) break;
+                    provider = providerIterator.next();
+                    powerLeftInProvider = provider.getMaxPower().getValue();
+                }
+            }
+
+            request.usePower(requestedPower.subtract(powerLeftInReqest));
+        }
+
+        if (powerLeftInProvider != maxPower.getValue())
+            provider.providePower(maxPower.subtract(powerLeftInProvider));
     }
 }

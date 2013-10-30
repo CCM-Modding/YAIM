@@ -6,7 +6,7 @@ import ccm.yaim.util.SINumber;
 import net.minecraft.world.World;
 
 import static ccm.yaim.util.TheMetricSystem.Prefix.YOTTA;
-import static ccm.yaim.util.TheMetricSystem.Unit.REAL_POWER;
+import static ccm.yaim.util.TheMetricSystem.Unit.POWER;
 import static ccm.yaim.util.TheMetricSystem.Unit.VOLTAGE;
 
 public class TileProvider extends TileNetworkPart implements IPowerProvider
@@ -29,12 +29,24 @@ public class TileProvider extends TileNetworkPart implements IPowerProvider
     @Override
     public SINumber getMaxPower()
     {
-        return new SINumber(REAL_POWER, 1, YOTTA);
+        return new SINumber(POWER, 1, YOTTA);
     }
 
     @Override
     public void providePower(SINumber amps)
     {
         System.out.println(this.toString() + " provided " + amps.toString());
+    }
+
+    @Override
+    public byte getProviderPriority()
+    {
+        return Byte.MAX_VALUE;
+    }
+
+    @Override
+    public int compareTo(IPowerProvider o)
+    {
+        return getProviderPriority() - o.getProviderPriority();
     }
 }
