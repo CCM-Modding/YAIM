@@ -1,0 +1,5 @@
+Copper = d15f28
+Gold = ffff00
+Silver = c2d1d1
+Aluminium = d2dada
+Electrum = ebda84
