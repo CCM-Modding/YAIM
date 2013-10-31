@@ -6,7 +6,9 @@ import ccm.yaim.parts.IConductor;
 import ccm.yaim.parts.INetworkPart;
 import ccm.yaim.util.SINumber;
 import codechicken.lib.vec.BlockCoord;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.world.World;
 
 import static ccm.yaim.util.TheMetricSystem.Prefix.YOTTA;
@@ -87,6 +89,12 @@ public class TileNetworkPart extends TileEntity implements INetworkPart, IConduc
         }
 
         this.getNetwork().refresh();
+    }
+
+    @Override
+    public void debug(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float hitX, float hitY, float hitZ)
+    {
+        entityPlayer.sendChatToPlayer(ChatMessageComponent.createFromText(this.getNetwork().toString()));
     }
 
     @Override

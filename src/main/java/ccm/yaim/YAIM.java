@@ -3,6 +3,7 @@ package ccm.yaim;
 import ccm.yaim.block.BlockCable;
 import ccm.yaim.block.BlockConsumer;
 import ccm.yaim.block.BlockProvider;
+import ccm.yaim.cmd.CommandYAIMDebug;
 import ccm.yaim.network.NetworkTicker;
 import ccm.yaim.tiles.TileCable;
 import ccm.yaim.tiles.TileConsumer;
@@ -11,6 +12,7 @@ import ccm.yaim.util.Data;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.common.registry.TickRegistry;
@@ -53,5 +55,11 @@ public class YAIM
         GameRegistry.registerTileEntity(TileProvider.class, Data.MODID + ".PROVIDER");
 
         TickRegistry.registerTickHandler(NetworkTicker.INSTANCE, Side.SERVER);
+    }
+
+    @Mod.EventHandler
+    public void fmlEvent(FMLServerStartingEvent event)
+    {
+        event.registerServerCommand(new CommandYAIMDebug());
     }
 }

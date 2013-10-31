@@ -69,6 +69,7 @@ public class PowerNetwork implements INetwork
     @Override
     public void merge(INetwork network)
     {
+        if (world.isRemote) return;
         if (network != null && network != this)
         {
             PowerNetwork newNetwork = new PowerNetwork(world);
@@ -82,6 +83,7 @@ public class PowerNetwork implements INetwork
     @Override
     public void remove(INetworkPart part)
     {
+        if (world.isRemote) return;
         parts.remove(part);
         conductors.remove(part);
         providers.remove(part);
@@ -114,16 +116,17 @@ public class PowerNetwork implements INetwork
                 tempParts.add(part);
                 for (INetworkPart part1 : part.getAdjacentParts())
                 {
-                    if (part1 != null)
+                    if (part1 != null && !parts.contains(part1))
                     {
                         tempParts.add(part1);
                     }
                 }
             }
         }
-
         parts.clear();
         addAll(tempParts);
+        tempParts.clear();
+
 
         for (IPowerProvider provider : providers)
         {
@@ -141,6 +144,7 @@ public class PowerNetwork implements INetwork
 
     public void addAll(Collection<INetworkPart> partsToAdd)
     {
+        if (world.isRemote) return;
         for (INetworkPart part : partsToAdd)
         {
             world.setBlock(part.getTE().xCoord, part.getTE().yCoord + 5, part.getTE().zCoord, Block.glowStone.blockID);
@@ -151,6 +155,7 @@ public class PowerNetwork implements INetwork
     @Override
     public void add(INetworkPart part)
     {
+        if (world.isRemote) return;
         parts.add(part);
         part.setNetwork(this);
         if (part instanceof IConductor) conductors.add((IConductor) part);
@@ -160,7 +165,10 @@ public class PowerNetwork implements INetwork
 
     public void tick()
     {
-        SINumber maxProvided = new SINumber(TheMetricSystem.Unit.POWER, 0);
+        if (world.isRemote) return;
+
+        if (consumers.isEmpty() || providers.isEmpty()) return;
+
         ArrayList<IPowerProvider> usefullProviders = new ArrayList<IPowerProvider>();
         for (IPowerProvider provider : providers)
         {
@@ -210,5 +218,11 @@ public class PowerNetwork implements INetwork
 
         if (powerLeftInProvider != maxPower.getValue())
             provider.providePower(maxPower.subtract(powerLeftInProvider));
+    }
+
+    @Override
+    public String toString()
+    {
+        return "PownerNet with " + parts.size() + " parts. " + this.hashCode();
     }
 }

@@ -54,4 +54,9 @@ public class NetworkTicker implements ITickHandler
         System.out.println("Removing network");
         del.add(network);
     }
+
+    public HashSet<INetwork> getNetworks()
+    {
+        return networks;
+    }
 }
