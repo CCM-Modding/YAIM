@@ -85,4 +85,9 @@ public class SINumber
     {
         return SINumber.getMostAppropriate(this.unit, getValue() - f);
     }
+
+    public SINumber add(float f)
+    {
+        return SINumber.getMostAppropriate(this.unit, getValue() + f);
+    }
 }

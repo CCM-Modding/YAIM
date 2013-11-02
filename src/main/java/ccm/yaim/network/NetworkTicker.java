@@ -1,6 +1,8 @@
 package ccm.yaim.network;
 
 import ccm.yaim.util.Data;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.IScheduledTickHandler;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 
@@ -17,8 +19,11 @@ public class NetworkTicker implements ITickHandler
     @Override
     public void tickStart(EnumSet<TickType> type, Object... tickData)
     {
-        networks.removeAll(del) ; del.clear();
-        networks.addAll(add)    ; add.clear();
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) return;
+        networks.removeAll(del);
+        networks.addAll(add);
+        del.clear();
+        add.clear();
         for (INetwork network : networks)
         {
             if (network.isEmpty()) del.add(network);
@@ -47,14 +52,12 @@ public class NetworkTicker implements ITickHandler
     public void addNetwork(INetwork network)
     {
         if (network.getWorld().isRemote) return;
-        System.out.println("Adding network");
         add.add(network);
     }
 
     public void removeNetwork(INetwork network)
     {
         if (network.getWorld().isRemote) return;
-        System.out.println("Removing network");
         del.add(network);
     }
 

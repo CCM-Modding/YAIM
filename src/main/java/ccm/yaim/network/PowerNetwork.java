@@ -10,6 +10,7 @@ import ccm.yaim.util.TheMetricSystem;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.TreeMultimap;
 import net.minecraft.block.Block;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 
 import java.util.*;
@@ -49,8 +50,8 @@ public class PowerNetwork implements INetwork
         if (network != null && network != this)
         {
             PowerNetwork newNetwork = new PowerNetwork(world);
-            newNetwork.addAll(this.getParts());
-            newNetwork.addAll(network.getParts());
+            newNetwork.getParts().addAll(this.getParts());
+            newNetwork.getParts().addAll(network.getParts());
 
             newNetwork.refresh();
 
@@ -79,14 +80,8 @@ public class PowerNetwork implements INetwork
     public void refresh(INetworkPart... ignoreTiles)
     {
         if (world.isRemote) return;
-        System.out.println("Refresh P: " + parts.size());
 
         Iterator<INetworkPart> it = parts.iterator();
-        while (it.hasNext())
-        {
-            if (!it.next().getNetwork().equals(this)) it.remove();
-        }
-
         List<INetworkPart> ignoreList = Arrays.asList(ignoreTiles);
         boolean done = false;
         while (!done)
@@ -150,6 +145,7 @@ public class PowerNetwork implements INetwork
     public void tick()
     {
         if (world.isRemote) return;
+        System.out.println("Tick " + this.hashCode());
 
         ArrayList<IPowerProvider> usefullProviders = new ArrayList<IPowerProvider>();
         ArrayList<IPowerConsumer> requests = new ArrayList<IPowerConsumer>();
@@ -217,9 +213,7 @@ public class PowerNetwork implements INetwork
     @Override
     public void clear()
     {
-        for (INetworkPart part : parts) if (part.getNetwork().equals(this)) part.setNetwork(null);
         parts.clear();
-
         NetworkTicker.INSTANCE.removeNetwork(this);
     }
 
@@ -233,6 +227,7 @@ public class PowerNetwork implements INetwork
             if (part1 != null)
             {
                 part1.getNetwork().clear();
+                part1.setNetwork(null);
                 part1.getNetwork().refresh(part);
             }
         }

@@ -3,6 +3,8 @@ package ccm.yaim.tiles;
 import ccm.yaim.network.INetwork;
 import ccm.yaim.parts.IPowerConsumer;
 import ccm.yaim.util.SINumber;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.world.World;
 
 import static ccm.yaim.util.TheMetricSystem.Unit.POWER;
@@ -11,6 +13,7 @@ import static ccm.yaim.util.TheMetricSystem.Unit.RESISTANCE;
 public class TileConsumer extends TileNetworkPart implements IPowerConsumer
 {
     private INetwork network;
+    SINumber powerconsumed = new SINumber(POWER, 0);
 
     public TileConsumer()
     {
@@ -25,7 +28,7 @@ public class TileConsumer extends TileNetworkPart implements IPowerConsumer
     @Override
     public void usePower(SINumber power)
     {
-        //System.out.println(this.toString() + " consumed " + power.toString());
+        powerconsumed.add(power.getValue());
     }
 
     @Override
@@ -44,5 +47,11 @@ public class TileConsumer extends TileNetworkPart implements IPowerConsumer
     public int compareTo(IPowerConsumer o)
     {
         return getConsumerPriority() - o.getConsumerPriority();
+    }
+
+    @Override
+    public void debug(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float hitX, float hitY, float hitZ)
+    {
+        entityPlayer.sendChatToPlayer(ChatMessageComponent.createFromText("Consumed " + powerconsumed.toString()));
     }
 }
