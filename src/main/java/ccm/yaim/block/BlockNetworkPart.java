@@ -2,8 +2,12 @@ package ccm.yaim.block;
 
 import ccm.yaim.parts.INetworkPart;
 import ccm.yaim.util.Data;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
@@ -13,17 +17,17 @@ public abstract class BlockNetworkPart extends BlockContainer
     protected BlockNetworkPart(int par1, Material par2Material)
     {
         super(par1, par2Material);
+        this.setCreativeTab(CreativeTabs.tabRedstone);
     }
 
     @Override
     public void onBlockAdded(World world, int x, int y, int z)
     {
-        TileEntity myTe = world.getBlockTileEntity(x, y, z);
+        TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
 
-        if (myTe instanceof INetworkPart)
+        if (tileEntity instanceof INetworkPart)
         {
-            INetworkPart tile = (INetworkPart) myTe;
-            tile.refresh();
+            ((INetworkPart) tileEntity).init();
         }
         super.onBlockAdded(world, x, y, z);
     }
@@ -35,7 +39,7 @@ public abstract class BlockNetworkPart extends BlockContainer
 
         if (tileEntity instanceof INetworkPart)
         {
-            ((INetworkPart) tileEntity).refresh();
+            ((INetworkPart) tileEntity).update();
         }
         super.onNeighborBlockChange(world, x, y, z, blockID);
     }
@@ -46,7 +50,7 @@ public abstract class BlockNetworkPart extends BlockContainer
         TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
         if (tileEntity instanceof INetworkPart)
         {
-            ((INetworkPart) tileEntity).getNetwork().remove((INetworkPart) tileEntity);
+            ((INetworkPart) tileEntity).remove();
         }
         super.breakBlock(world, x, y, z, oldID, oldMeta);
     }
@@ -54,7 +58,7 @@ public abstract class BlockNetworkPart extends BlockContainer
     @Override
     public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float hitX, float hitY, float hitZ)
     {
-        if (world.isRemote) return false;
+        if (world.isRemote || entityPlayer.isSneaking()) return false;
         if (entityPlayer.getHeldItem() != null && entityPlayer.getHeldItem().itemID == Data.DEBUGITEM)
         {
             TileEntity te = world.getBlockTileEntity(x, y, z);
@@ -64,7 +68,7 @@ public abstract class BlockNetworkPart extends BlockContainer
                 ((INetworkPart)te).debug(world, x, y, z, entityPlayer, side, hitX, hitY, hitZ);
             }
         }
-        return true;
+        return false;
     }
 }
 

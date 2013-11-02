@@ -21,6 +21,7 @@ public class NetworkTicker implements ITickHandler
         networks.addAll(add)    ; add.clear();
         for (INetwork network : networks)
         {
+            if (network.isEmpty()) del.add(network);
             if (network.getWorld().equals(tickData[0]))
                 network.tick();
         }
@@ -45,12 +46,14 @@ public class NetworkTicker implements ITickHandler
 
     public void addNetwork(INetwork network)
     {
+        if (network.getWorld().isRemote) return;
         System.out.println("Adding network");
         add.add(network);
     }
 
     public void removeNetwork(INetwork network)
     {
+        if (network.getWorld().isRemote) return;
         System.out.println("Removing network");
         del.add(network);
     }
@@ -58,5 +61,12 @@ public class NetworkTicker implements ITickHandler
     public HashSet<INetwork> getNetworks()
     {
         return networks;
+    }
+
+    public void clear()
+    {
+        networks.clear();
+        add.clear();
+        del.clear();
     }
 }

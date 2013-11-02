@@ -1,6 +1,7 @@
 package ccm.yaim.block;
 
 import ccm.yaim.tiles.TileProvider;
+import ccm.yaim.util.Data;
 import net.minecraft.block.material.Material;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
@@ -11,6 +12,7 @@ public class BlockProvider extends BlockNetworkPart
     {
         super(par1, par2Material);
         this.setUnlocalizedName("provider");
+        this.setTextureName(Data.MODID + ":consumer");
     }
 
     @Override

@@ -25,7 +25,7 @@ public class TileConsumer extends TileNetworkPart implements IPowerConsumer
     @Override
     public void usePower(SINumber power)
     {
-        System.out.println(this.toString() + " consumed " + power.toString());
+        //System.out.println(this.toString() + " consumed " + power.toString());
     }
 
     @Override

@@ -16,10 +16,10 @@ import java.util.*;
 
 public class PowerNetwork implements INetwork
 {
-    private final HashSet<INetworkPart>   parts      = new HashSet<INetworkPart>();
-    private final HashSet<IConductor>     conductors = new HashSet<IConductor>();
-    private final HashSet<IPowerConsumer> consumers  = new HashSet<IPowerConsumer>();
-    private final HashSet<IPowerProvider> providers  = new HashSet<IPowerProvider>();
+    private final HashSet<INetworkPart> parts  = new HashSet<INetworkPart>();
+    //private final HashSet<IConductor>     conductors = new HashSet<IConductor>();
+    //private final HashSet<IPowerConsumer> consumers  = new HashSet<IPowerConsumer>();
+    //private final HashSet<IPowerProvider> providers  = new HashSet<IPowerProvider>();
 
     private       SINumber voltage;
     private final World    world;
@@ -29,30 +29,6 @@ public class PowerNetwork implements INetwork
         this.voltage = new SINumber(TheMetricSystem.Unit.VOLTAGE, 0);
         this.world = world;
         NetworkTicker.INSTANCE.addNetwork(this);
-    }
-
-    @Override
-    public Set<INetworkPart> getParts()
-    {
-        return parts;
-    }
-
-    @Override
-    public Set<IConductor> getConductors()
-    {
-        return conductors;
-    }
-
-    @Override
-    public Set<IPowerConsumer> getPowerConsumers()
-    {
-        return consumers;
-    }
-
-    @Override
-    public Set<IPowerProvider> getPowerProviders()
-    {
-        return providers;
     }
 
     public SINumber getVoltage()
@@ -73,10 +49,13 @@ public class PowerNetwork implements INetwork
         if (network != null && network != this)
         {
             PowerNetwork newNetwork = new PowerNetwork(world);
-            newNetwork.getParts().addAll(this.getParts());
-            newNetwork.getParts().addAll(network.getParts());
+            newNetwork.addAll(this.getParts());
+            newNetwork.addAll(network.getParts());
 
             newNetwork.refresh();
+
+            this.getParts();
+            network.clear();
         }
     }
 
@@ -85,101 +64,110 @@ public class PowerNetwork implements INetwork
     {
         if (world.isRemote) return;
         parts.remove(part);
-        conductors.remove(part);
-        providers.remove(part);
-        consumers.remove(part);
 
-        if (parts.isEmpty())
+        if (isEmpty())
             NetworkTicker.INSTANCE.removeNetwork(this);
     }
 
     @Override
-    public void refresh()
+    public Set<INetworkPart> getParts()
+    {
+        return parts;
+    }
+
+    @Override
+    public void refresh(INetworkPart... ignoreTiles)
     {
         if (world.isRemote) return;
-        System.out.println("Refresh " + parts.size());
-        conductors.clear();
-        providers.clear();
-        consumers.clear();
+        System.out.println("Refresh P: " + parts.size());
 
-        HashSet<INetworkPart> tempParts = new HashSet<INetworkPart>();
         Iterator<INetworkPart> it = parts.iterator();
-
         while (it.hasNext())
         {
-            INetworkPart part = it.next();
+            if (!it.next().getNetwork().equals(this)) it.remove();
+        }
 
-            if (part == null) it.remove();
-            else if (part.getTE().isInvalid()) it.remove();
-            else
+        List<INetworkPart> ignoreList = Arrays.asList(ignoreTiles);
+        boolean done = false;
+        while (!done)
+        {
+            HashSet<INetworkPart> tempParts = new HashSet<INetworkPart>();
+            it = parts.iterator();
+
+            while (it.hasNext())
             {
-                tempParts.add(part);
-                for (INetworkPart part1 : part.getAdjacentParts())
+                INetworkPart part = it.next();
+
+                if (part == null) it.remove();
+                else if (part.getTE().isInvalid()) it.remove();
+                else
                 {
-                    if (part1 != null && !parts.contains(part1))
+                    part.setNetwork(this);
+                    for (INetworkPart part1 : part.getAdjacentParts())
                     {
-                        tempParts.add(part1);
+                        if (part1 != null && !parts.contains(part1) && !ignoreList.contains(part1))
+                        {
+                            part.setNetwork(this);
+                            tempParts.add(part1);
+                        }
                     }
                 }
             }
+            addAll(tempParts);
+            if (tempParts.isEmpty()) done = true;
         }
-        parts.clear();
-        addAll(tempParts);
-        tempParts.clear();
 
-
-        for (IPowerProvider provider : providers)
+        for (INetworkPart part : parts)
         {
-            if (!provider.getMaxPower().equals(voltage))
+            if (part instanceof IPowerProvider)
             {
-                if (voltage == null) voltage = provider.getVoltage().clone();
-                else if (provider.getMaxPower().getValue() > voltage.getValue())
-                    voltage = provider.getVoltage().clone();
+                IPowerProvider provider = (IPowerProvider) part;
+                if (!provider.getMaxPower().equals(voltage))
+                {
+                    if (voltage == null) voltage = provider.getVoltage().clone();
+                    else if (provider.getMaxPower().getValue() > voltage.getValue())
+                        voltage = provider.getVoltage().clone();
+                }
             }
         }
-
-        if (parts.isEmpty())
-            NetworkTicker.INSTANCE.removeNetwork(this);
     }
 
     public void addAll(Collection<INetworkPart> partsToAdd)
     {
         if (world.isRemote) return;
         for (INetworkPart part : partsToAdd)
-        {
-            world.setBlock(part.getTE().xCoord, part.getTE().yCoord + 5, part.getTE().zCoord, Block.glowStone.blockID);
             add(part);
-        }
     }
 
     @Override
     public void add(INetworkPart part)
     {
         if (world.isRemote) return;
-        parts.add(part);
         part.setNetwork(this);
-        if (part instanceof IConductor) conductors.add((IConductor) part);
-        if (part instanceof IPowerProvider) providers.add((IPowerProvider) part);
-        if (part instanceof IPowerConsumer) consumers.add((IPowerConsumer) part);
+        parts.add(part);
     }
 
     public void tick()
     {
         if (world.isRemote) return;
 
-        if (consumers.isEmpty() || providers.isEmpty()) return;
-
         ArrayList<IPowerProvider> usefullProviders = new ArrayList<IPowerProvider>();
-        for (IPowerProvider provider : providers)
+        ArrayList<IPowerConsumer> requests = new ArrayList<IPowerConsumer>();
+        for (INetworkPart part : parts)
         {
-            if (provider.getVoltage().equals(getVoltage()))
+            if (part instanceof IPowerProvider)
             {
-                usefullProviders.add(provider);
+                if (((IPowerProvider)part).getVoltage().equals(getVoltage()))
+                {
+                    usefullProviders.add((IPowerProvider)part);
+                }
+            }
+            if (part instanceof IPowerConsumer)
+            {
+                requests.add((IPowerConsumer) part);
             }
         }
         Collections.sort(usefullProviders);
-        ArrayList<IPowerConsumer> requests = new ArrayList<IPowerConsumer>();
-        requests.addAll(consumers);
         Collections.sort(requests);
 
         Iterator<IPowerProvider> providerIterator = usefullProviders.iterator();
@@ -221,8 +209,38 @@ public class PowerNetwork implements INetwork
     }
 
     @Override
+    public boolean isEmpty()
+    {
+        return parts.isEmpty();
+    }
+
+    @Override
+    public void clear()
+    {
+        for (INetworkPart part : parts) if (part.getNetwork().equals(this)) part.setNetwork(null);
+        parts.clear();
+
+        NetworkTicker.INSTANCE.removeNetwork(this);
+    }
+
+    @Override
+    public void split(INetworkPart part)
+    {
+        remove(part);
+
+        for (INetworkPart part1 : part.getAdjacentParts())
+        {
+            if (part1 != null)
+            {
+                part1.getNetwork().clear();
+                part1.getNetwork().refresh(part);
+            }
+        }
+    }
+
+    @Override
     public String toString()
     {
-        return "PownerNet with " + parts.size() + " parts. " + this.hashCode();
+        return "PownerNet with P:" + parts.size() + " hc:" + this.hashCode() + " Server?:" + !world.isRemote;
     }
 }

@@ -16,30 +16,18 @@ import java.util.Set;
  */
 public interface INetwork
 {
-    /**
-     * @return all the parts that make up this network
-     */
     public Set<INetworkPart> getParts();
 
-    /**
-     * @return all of the conductors in this network
-     */
-    public Set<IConductor> getConductors();
+    //public Set<IConductor> getConductors();
 
-    /**
-     * @return all of the power consumers in this network
-     */
-    public Set<IPowerConsumer> getPowerConsumers();
+    //public Set<IPowerConsumer> getPowerConsumers();
 
-    /**
-     * @return all of the power providers in this network
-     */
-    public Set<IPowerProvider> getPowerProviders();
+    //public Set<IPowerProvider> getPowerProviders();
 
     /**
      * Call to recalculate the entire network.
      */
-    public void refresh();
+    public void refresh(INetworkPart... ignoreTiles);
 
     /**
      * @return the world this network is part of
@@ -58,4 +46,10 @@ public interface INetwork
     void add(INetworkPart part);
 
     void tick();
+
+    boolean isEmpty();
+
+    void clear();
+
+    void split(INetworkPart part);
 }

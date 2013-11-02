@@ -60,6 +60,7 @@ public class YAIM
     @Mod.EventHandler
     public void fmlEvent(FMLServerStartingEvent event)
     {
+        NetworkTicker.INSTANCE.clear();
         event.registerServerCommand(new CommandYAIMDebug());
     }
 }

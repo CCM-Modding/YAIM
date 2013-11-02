@@ -25,7 +25,11 @@ public interface INetworkPart
      */
     public INetworkPart[] getAdjacentParts();
 
-    public void refresh();
-
     void debug(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float hitX, float hitY, float hitZ);
+
+    void init();
+
+    void update();
+
+    void remove();
 }

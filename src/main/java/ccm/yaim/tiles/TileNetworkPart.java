@@ -45,7 +45,7 @@ public class TileNetworkPart extends TileEntity implements INetworkPart, IConduc
     @Override
     public void setNetwork(INetwork network)
     {
-        if (network != null && network != this.network) network.remove(this);
+        if (this.network != null && network != this.network) this.network.remove(this);
         this.network = network;
     }
 
@@ -79,22 +79,34 @@ public class TileNetworkPart extends TileEntity implements INetworkPart, IConduc
     }
 
     @Override
-    public void refresh()
-    {
-        adjacentParts = null;
-
-        for (INetworkPart part : getAdjacentParts())
-        {
-            if (part != null) this.getNetwork().merge(part.getNetwork());
-        }
-
-        this.getNetwork().refresh();
-    }
-
-    @Override
     public void debug(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float hitX, float hitY, float hitZ)
     {
         entityPlayer.sendChatToPlayer(ChatMessageComponent.createFromText(this.getNetwork().toString()));
+    }
+
+    @Override
+    public void init()
+    {
+        update();
+    }
+
+    @Override
+    public void update()
+    {
+        adjacentParts = null;
+        for (INetworkPart part : getAdjacentParts())
+        {
+            if (part != null)
+            {
+                getNetwork().merge(part.getNetwork());
+            }
+        }
+    }
+
+    @Override
+    public void remove()
+    {
+        getNetwork().split(this);
     }
 
     @Override
@@ -112,12 +124,12 @@ public class TileNetworkPart extends TileEntity implements INetworkPart, IConduc
     @Override
     public void melt()
     {
+
     }
 
     @Override
     public void invalidate()
     {
         super.invalidate();
-        getNetwork().refresh();
     }
 }

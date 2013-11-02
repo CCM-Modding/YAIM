@@ -26,6 +26,10 @@ local.properties
 .classpath
 .settings/
 .loadpath
+src/main/java/buildcraft
+src/main/java/ic2
+src/main/java/thermalexpansion
+src/main/java/universalelectricity
 
 # External tool builders
 .externalToolBuilders/
