@@ -145,7 +145,6 @@ public class PowerNetwork implements INetwork
     public void tick()
     {
         if (world.isRemote) return;
-        System.out.println("Tick " + this.hashCode());
 
         ArrayList<IPowerProvider> usefullProviders = new ArrayList<IPowerProvider>();
         ArrayList<IPowerConsumer> requests = new ArrayList<IPowerConsumer>();

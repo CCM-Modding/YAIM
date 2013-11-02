@@ -7,6 +7,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.world.World;
 
+import static ccm.yaim.util.TheMetricSystem.Prefix.KILO;
 import static ccm.yaim.util.TheMetricSystem.Prefix.YOTTA;
 import static ccm.yaim.util.TheMetricSystem.Unit.POWER;
 import static ccm.yaim.util.TheMetricSystem.Unit.VOLTAGE;
@@ -35,13 +36,13 @@ public class TileProvider extends TileNetworkPart implements IPowerProvider
     @Override
     public SINumber getMaxPower()
     {
-        return new SINumber(POWER, 1, YOTTA);
+        return new SINumber(POWER, 1, KILO);
     }
 
     @Override
-    public void providePower(SINumber amps)
+    public void providePower(SINumber power)
     {
-        powerprovided.add(amps.getValue() * getVoltage().getValue());
+        powerprovided = powerprovided.add(power.getValue());
     }
 
     @Override
@@ -59,6 +60,7 @@ public class TileProvider extends TileNetworkPart implements IPowerProvider
     @Override
     public void debug(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float hitX, float hitY, float hitZ)
     {
+        if (world.isRemote) return;
         entityPlayer.sendChatToPlayer(ChatMessageComponent.createFromText("Provided " + powerprovided.toString()));
     }
 }

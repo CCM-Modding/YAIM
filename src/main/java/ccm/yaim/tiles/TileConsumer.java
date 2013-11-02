@@ -28,7 +28,7 @@ public class TileConsumer extends TileNetworkPart implements IPowerConsumer
     @Override
     public void usePower(SINumber power)
     {
-        powerconsumed.add(power.getValue());
+        powerconsumed = powerconsumed.add(power.getValue());
     }
 
     @Override
@@ -52,6 +52,7 @@ public class TileConsumer extends TileNetworkPart implements IPowerConsumer
     @Override
     public void debug(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float hitX, float hitY, float hitZ)
     {
+        if (world.isRemote) return;
         entityPlayer.sendChatToPlayer(ChatMessageComponent.createFromText("Consumed " + powerconsumed.toString()));
     }
 }
