@@ -3,12 +3,16 @@ package ccm.yaim;
 import ccm.yaim.block.BlockCable;
 import ccm.yaim.block.BlockConsumer;
 import ccm.yaim.block.BlockProvider;
+import ccm.yaim.block.YMaterial;
 import ccm.yaim.cmd.CommandYAIMDebug;
+import ccm.yaim.multipart.Content;
 import ccm.yaim.network.NetworkTicker;
 import ccm.yaim.tiles.TileCable;
 import ccm.yaim.tiles.TileConsumer;
 import ccm.yaim.tiles.TileProvider;
 import ccm.yaim.util.Data;
+import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
@@ -26,16 +30,20 @@ public class YAIM
     @Mod.Instance(Data.MODID)
     public static YAIM instance;
 
-    public static BlockCable    blockCable;
-    public static BlockConsumer blockConsumer;
-    public static BlockProvider blockProvider;
+    public BlockCable    blockCable;
+    public BlockConsumer blockConsumer;
+    public BlockProvider blockProvider;
+
+    public Yaimconfig yaimconfig = new Yaimconfig();
 
     @Mod.EventHandler
     public void fmlEvent(FMLPreInitializationEvent event)
     {
-        blockCable = new BlockCable(901, new Material(MapColor.ironColor));
-        blockConsumer = new BlockConsumer(902, new Material(MapColor.ironColor));
-        blockProvider = new BlockProvider(903, new Material(MapColor.ironColor));
+        yaimconfig.doConfig(event.getSuggestedConfigurationFile());
+
+        blockCable = new BlockCable(yaimconfig.block_cable, YMaterial.intance);
+        blockConsumer = new BlockConsumer(yaimconfig.block_consumer, YMaterial.intance);
+        blockProvider = new BlockProvider(yaimconfig.block_provider, YMaterial.intance);
 
         GameRegistry.registerBlock(blockCable, "CABLE");
         GameRegistry.registerBlock(blockConsumer, "CONSUMER");
@@ -45,6 +53,7 @@ public class YAIM
         LanguageRegistry.addName(blockConsumer, "Consumer");
         LanguageRegistry.addName(blockProvider, "Provider");
 
+        new Content().init();
     }
 
     @Mod.EventHandler

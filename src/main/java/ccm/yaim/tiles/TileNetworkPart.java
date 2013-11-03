@@ -79,7 +79,7 @@ public class TileNetworkPart extends TileEntity implements INetworkPart, IConduc
     }
 
     @Override
-    public void debug(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float hitX, float hitY, float hitZ)
+    public void debug(World world, int x, int y, int z, EntityPlayer entityPlayer)
     {
         entityPlayer.sendChatToPlayer(ChatMessageComponent.createFromText(this.getNetwork().toString()));
     }

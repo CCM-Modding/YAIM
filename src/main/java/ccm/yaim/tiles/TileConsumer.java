@@ -8,7 +8,6 @@ import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.world.World;
 
 import static ccm.yaim.util.TheMetricSystem.Unit.POWER;
-import static ccm.yaim.util.TheMetricSystem.Unit.RESISTANCE;
 
 public class TileConsumer extends TileNetworkPart implements IPowerConsumer
 {
@@ -50,7 +49,7 @@ public class TileConsumer extends TileNetworkPart implements IPowerConsumer
     }
 
     @Override
-    public void debug(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float hitX, float hitY, float hitZ)
+    public void debug(World world, int x, int y, int z, EntityPlayer entityPlayer)
     {
         if (world.isRemote) return;
         entityPlayer.sendChatToPlayer(ChatMessageComponent.createFromText("Consumed " + powerconsumed.toString()));

@@ -58,6 +58,11 @@ public abstract class BlockNetworkPart extends BlockContainer
     @Override
     public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float hitX, float hitY, float hitZ)
     {
+        return onBlockActivated(world, x, y, z, entityPlayer);
+    }
+
+    public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer entityPlayer)
+    {
         if (world.isRemote || entityPlayer.isSneaking()) return false;
         if (entityPlayer.getHeldItem() != null && entityPlayer.getHeldItem().itemID == Data.DEBUGITEM)
         {
@@ -65,7 +70,7 @@ public abstract class BlockNetworkPart extends BlockContainer
 
             if (te instanceof INetworkPart)
             {
-                ((INetworkPart)te).debug(world, x, y, z, entityPlayer, side, hitX, hitY, hitZ);
+                ((INetworkPart)te).debug(world, x, y, z, entityPlayer);
             }
         }
         return false;
