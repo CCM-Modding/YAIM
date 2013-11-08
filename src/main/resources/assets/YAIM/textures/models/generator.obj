@@ -1,10 +1,10 @@
 # 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
-# File Created: 08.11.2013 16:21:37
+# File Created: 08.11.2013 16:32:45
 
-mtllib generator.mtl
+mtllib Generator.mtl
 
 #
-# object Cylinder001
+# object Body
 #
 
 v  0.0000 1.2800 -1.1200
@@ -65,7 +65,7 @@ vt 0.1250 0.2502 0.0000
 vt 0.2132 0.2868 0.0000
 # 36 texture coords
 
-g Cylinder001
+g Body
 usemtl Material__43
 f 1/1 2/2 3/3 
 f 1/1 4/4 2/2 
@@ -102,7 +102,7 @@ f 18/28 17/36 11/29
 # 32 faces
 
 #
-# object Box002
+# object Base
 #
 
 v  -1.2800 0.0000 1.2800
@@ -131,7 +131,7 @@ vt 0.2812 0.6878 0.0000
 vt 0.5310 0.6878 0.0000
 # 14 texture coords
 
-g Box002
+g Base
 usemtl Material__43
 f 19/37 20/38 21/39 
 f 21/39 22/40 19/37 
@@ -148,7 +148,7 @@ f 23/41 26/44 20/38
 # 12 faces
 
 #
-# object Box003
+# object Rod
 #
 
 v  -0.1600 1.1200 1.1200
@@ -177,7 +177,7 @@ vt 0.6407 0.9219 0.0000
 vt 0.6719 0.9219 0.0000
 # 14 texture coords
 
-g Box003
+g Rod
 usemtl Material__43
 f 27/51 28/52 29/53 
 f 29/53 30/54 27/51 
@@ -194,7 +194,7 @@ f 31/55 34/58 28/52
 # 12 faces
 
 #
-# object Box004
+# object Output
 #
 
 v  -0.6400 0.3200 -1.2800
@@ -223,7 +223,7 @@ vt 0.8594 -0.1873 0.0000
 vt 0.9843 -0.1873 0.0000
 # 14 texture coords
 
-g Box004
+g Output
 usemtl Material__43
 f 35/65 36/66 37/67 
 f 37/67 38/68 35/65 
@@ -240,7 +240,7 @@ f 39/69 42/72 36/66
 # 12 faces
 
 #
-# object Plane001
+# object Strap1
 #
 
 v  1.2773 1.2783 0.6400
@@ -255,14 +255,14 @@ vt 0.6406 0.8905 0.0000
 vt 0.6406 0.7969 0.0000
 # 4 texture coords
 
-g Plane001
+g Strap1
 usemtl Material__43
 f 43/79 44/80 45/81 
 f 46/82 45/81 44/80 
 # 2 faces
 
 #
-# object Plane002
+# object Strap2
 #
 
 v  1.2773 1.2783 -0.9600
@@ -277,14 +277,14 @@ vt 0.6406 0.8905 0.0000
 vt 0.6406 0.7969 0.0000
 # 4 texture coords
 
-g Plane002
+g Strap2
 usemtl Material__43
 f 47/83 48/84 49/85 
 f 50/86 49/85 48/84 
 # 2 faces
 
 #
-# object Plane003
+# object Strap3
 #
 
 v  -1.2811 1.2783 -0.6400
@@ -299,14 +299,14 @@ vt 0.6406 0.8905 0.0000
 vt 0.6406 0.7969 0.0000
 # 4 texture coords
 
-g Plane003
+g Strap3
 usemtl Material__43
 f 51/87 52/88 53/89 
 f 54/90 53/89 52/88 
 # 2 faces
 
 #
-# object Plane004
+# object Strap4
 #
 
 v  -1.2811 1.2783 0.9600
@@ -321,7 +321,7 @@ vt 0.6406 0.8905 0.0000
 vt 0.6406 0.7969 0.0000
 # 4 texture coords
 
-g Plane004
+g Strap4
 usemtl Material__43
 f 55/91 56/92 57/93 
 f 58/94 57/93 56/92 
