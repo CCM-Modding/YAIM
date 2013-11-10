@@ -30,6 +30,8 @@ src/main/java/buildcraft
 src/main/java/ic2
 src/main/java/thermalexpansion
 src/main/java/universalelectricity
+src/main/java/basiccomponents
+src/main/resources/assets/basiccomponents
 
 # External tool builders
 .externalToolBuilders/
