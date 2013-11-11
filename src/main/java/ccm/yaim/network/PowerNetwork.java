@@ -79,51 +79,57 @@ public class PowerNetwork implements INetwork
     @Override
     public void refresh(INetworkPart... ignoreTiles)
     {
-        if (world.isRemote) return;
-
-        Iterator<INetworkPart> it = parts.iterator();
-        List<INetworkPart> ignoreList = Arrays.asList(ignoreTiles);
-        boolean done = false;
-        while (!done)
+        try
         {
-            HashSet<INetworkPart> tempParts = new HashSet<INetworkPart>();
-            it = parts.iterator();
+            if (world.isRemote) return;
 
-            while (it.hasNext())
+            Iterator<INetworkPart> it = parts.iterator();
+            List<INetworkPart> ignoreList = Arrays.asList(ignoreTiles);
+            boolean done = false;
+            while (!done)
             {
-                INetworkPart part = it.next();
+                HashSet<INetworkPart> tempParts = new HashSet<INetworkPart>();
+                it = parts.iterator();
 
-                if (part == null) it.remove();
-                else if (part.getTE().isInvalid()) it.remove();
-                else
+                while (it.hasNext())
                 {
-                    part.setNetwork(this);
-                    for (INetworkPart part1 : part.getAdjacentParts())
+                    INetworkPart part = it.next();
+
+                    if (part == null) it.remove();
+                    else
                     {
-                        if (part1 != null && !parts.contains(part1) && !ignoreList.contains(part1))
+                        part.setNetwork(this);
+                        for (INetworkPart part1 : part.getAdjacentParts())
                         {
-                            part.setNetwork(this);
-                            tempParts.add(part1);
+                            if (part1 != null && !parts.contains(part1) && !ignoreList.contains(part1))
+                            {
+                                part.setNetwork(this);
+                                tempParts.add(part1);
+                            }
                         }
                     }
                 }
+                addAll(tempParts);
+                if (tempParts.isEmpty()) done = true;
             }
-            addAll(tempParts);
-            if (tempParts.isEmpty()) done = true;
-        }
 
-        for (INetworkPart part : parts)
-        {
-            if (part instanceof IPowerProvider)
+            for (INetworkPart part : parts)
             {
-                IPowerProvider provider = (IPowerProvider) part;
-                if (!provider.getMaxPower().equals(voltage))
+                if (part instanceof IPowerProvider)
                 {
-                    if (voltage == null) voltage = provider.getVoltage().clone();
-                    else if (provider.getMaxPower().getValue() > voltage.getValue())
-                        voltage = provider.getVoltage().clone();
+                    IPowerProvider provider = (IPowerProvider) part;
+                    if (!provider.getMaxPower().equals(voltage))
+                    {
+                        if (voltage == null) voltage = provider.getVoltage().clone();
+                        else if (provider.getMaxPower().getValue() > voltage.getValue())
+                            voltage = provider.getVoltage().clone();
+                    }
                 }
             }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
     }
 

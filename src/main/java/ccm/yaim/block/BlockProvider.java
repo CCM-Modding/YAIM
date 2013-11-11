@@ -12,7 +12,7 @@ public class BlockProvider extends BlockNetworkPart
     {
         super(par1, par2Material);
         this.setUnlocalizedName("provider");
-        this.setTextureName(Data.MODID + ":consumer");
+        this.setTextureName(Data.MODID + ":provider");
     }
 
     @Override

@@ -1,7 +1,10 @@
 package ccm.yaim.block;
 
+import ccm.yaim.multipart.CablePart;
 import ccm.yaim.parts.INetworkPart;
 import ccm.yaim.util.Data;
+import codechicken.multipart.TMultiPart;
+import codechicken.multipart.TileMultipart;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.BlockContainer;
@@ -71,6 +74,13 @@ public abstract class BlockNetworkPart extends BlockContainer
             if (te instanceof INetworkPart)
             {
                 ((INetworkPart)te).debug(world, x, y, z, entityPlayer);
+            }
+            else if (te instanceof TileMultipart)
+            {
+                for (TMultiPart t : ((TileMultipart) te).jPartList())
+                {
+                    entityPlayer.addChatMessage(t.getType() + " " + t.toString());
+                }
             }
         }
         return false;

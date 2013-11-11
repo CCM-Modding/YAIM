@@ -16,8 +16,6 @@ public interface INetworkPart
 
     public void setNetwork(INetwork network);
 
-    public TileEntity getTE();
-
     /**
      * The array needs to be 6 long!
      *

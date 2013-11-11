@@ -1,13 +1,15 @@
 package ccm.yaim;
 
-import ccm.yaim.block.BlockCable;
+//import ccm.yaim.block.BlockCable;
 import ccm.yaim.block.BlockConsumer;
 import ccm.yaim.block.BlockProvider;
 import ccm.yaim.block.YMaterial;
+import ccm.yaim.client.ClientHandler;
 import ccm.yaim.cmd.CommandYAIMDebug;
 import ccm.yaim.multipart.Content;
+import ccm.yaim.multipart.ItemWirePart;
 import ccm.yaim.network.NetworkTicker;
-import ccm.yaim.tiles.TileCable;
+//import ccm.yaim.tiles.TileCable;
 import ccm.yaim.tiles.TileConsumer;
 import ccm.yaim.tiles.TileProvider;
 import ccm.yaim.util.Data;
@@ -30,9 +32,11 @@ public class YAIM
     @Mod.Instance(Data.MODID)
     public static YAIM instance;
 
-    public BlockCable    blockCable;
+    //public BlockCable    blockCable;
     public BlockConsumer blockConsumer;
     public BlockProvider blockProvider;
+
+    public ItemWirePart itemWirePart;
 
     public Yaimconfig yaimconfig = new Yaimconfig();
 
@@ -41,25 +45,26 @@ public class YAIM
     {
         yaimconfig.doConfig(event.getSuggestedConfigurationFile());
 
-        blockCable = new BlockCable(yaimconfig.block_cable, YMaterial.intance);
+        itemWirePart = new ItemWirePart(yaimconfig.block_cable);
         blockConsumer = new BlockConsumer(yaimconfig.block_consumer, YMaterial.intance);
         blockProvider = new BlockProvider(yaimconfig.block_provider, YMaterial.intance);
 
-        GameRegistry.registerBlock(blockCable, "CABLE");
+        GameRegistry.registerItem(itemWirePart, "CABLE");
         GameRegistry.registerBlock(blockConsumer, "CONSUMER");
         GameRegistry.registerBlock(blockProvider, "PROVIDER");
 
-        LanguageRegistry.addName(blockCable, "Cable");
+        LanguageRegistry.addName(itemWirePart, "Cable");
         LanguageRegistry.addName(blockConsumer, "Consumer");
         LanguageRegistry.addName(blockProvider, "Provider");
 
         new Content().init();
+        if (event.getSide().isClient()) ClientHandler.init();
     }
 
     @Mod.EventHandler
     public void fmlEvent(FMLInitializationEvent event)
     {
-        GameRegistry.registerTileEntity(TileCable.class, Data.MODID + ".CABLE");
+        //GameRegistry.registerTileEntity(TileCable.class, Data.MODID + ".CABLE");
         GameRegistry.registerTileEntity(TileConsumer.class, Data.MODID + ".CONSUMER");
         GameRegistry.registerTileEntity(TileProvider.class, Data.MODID + ".PROVIDER");
 

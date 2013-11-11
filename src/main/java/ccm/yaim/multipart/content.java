@@ -6,37 +6,13 @@ import codechicken.multipart.MultiPartRegistry;
 import codechicken.multipart.TMultiPart;
 import net.minecraft.world.World;
 
-public class Content implements MultiPartRegistry.IPartFactory, MultiPartRegistry.IPartConverter
+public class Content implements MultiPartRegistry.IPartFactory
 {
     public static String cableid = "yaim_cable";
 
     public void init()
     {
-        MultiPartRegistry.registerConverter(this);
         MultiPartRegistry.registerParts(this, new String[]{ cableid });
-    }
-
-    /**
-     * Return true if this converter can handle the specific blockID (may or may not actually convert the block)
-     */
-    @Override
-    public boolean canConvert(int blockID)
-    {
-        return blockID == YAIM.instance.blockCable.blockID;
-    }
-
-    /**
-     * Return a multipart version of the block at pos in world. Return null if no conversion is possible.
-     */
-    @Override
-    public TMultiPart convert(World world, BlockCoord pos)
-    {
-        int id = world.getBlockId(pos.x, pos.y, pos.z);
-
-        if (id == YAIM.instance.blockCable.blockID)
-            return new CablePart();
-
-        return null;
     }
 
     /**
