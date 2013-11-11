@@ -1,10 +1,6 @@
 package ccm.yaim.network;
 
-import ccm.yaim.parts.IConductor;
 import ccm.yaim.parts.INetworkPart;
-import ccm.yaim.parts.IPowerConsumer;
-import ccm.yaim.parts.IPowerProvider;
-import ccm.yaim.util.SINumber;
 import net.minecraft.world.World;
 
 import java.util.Set;

@@ -36,7 +36,7 @@ public class CommandYAIMDebug extends CommandBase
         }
         else if (args[0].equalsIgnoreCase("refresh"))
         {
-            int old =  NetworkTicker.INSTANCE.getNetworks().size();
+            int old = NetworkTicker.INSTANCE.getNetworks().size();
             for (INetwork network : NetworkTicker.INSTANCE.getNetworks())
             {
                 network.refresh();
@@ -48,8 +48,7 @@ public class CommandYAIMDebug extends CommandBase
     @Override
     public List addTabCompletionOptions(ICommandSender sender, String[] args)
     {
-        if (args.length == 1)
-            return getListOfStringsMatchingLastWord(args, "list", "refresh");
+        if (args.length == 1) return getListOfStringsMatchingLastWord(args, "list", "refresh");
         return null;
     }
 }

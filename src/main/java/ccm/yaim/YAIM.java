@@ -1,20 +1,15 @@
 package ccm.yaim;
 
-//import ccm.yaim.block.BlockCable;
 import ccm.yaim.block.BlockConsumer;
 import ccm.yaim.block.BlockProvider;
 import ccm.yaim.block.YMaterial;
-import ccm.yaim.client.ClientHandler;
 import ccm.yaim.cmd.CommandYAIMDebug;
 import ccm.yaim.multipart.Content;
 import ccm.yaim.multipart.ItemWirePart;
 import ccm.yaim.network.NetworkTicker;
-//import ccm.yaim.tiles.TileCable;
 import ccm.yaim.tiles.TileConsumer;
 import ccm.yaim.tiles.TileProvider;
 import ccm.yaim.util.Data;
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
@@ -23,8 +18,6 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
-import net.minecraft.block.material.MapColor;
-import net.minecraft.block.material.Material;
 
 @Mod(modid = Data.MODID, name = Data.MODID, dependencies = "required-after:ForgeMultipart")
 public class YAIM
@@ -32,7 +25,6 @@ public class YAIM
     @Mod.Instance(Data.MODID)
     public static YAIM instance;
 
-    //public BlockCable    blockCable;
     public BlockConsumer blockConsumer;
     public BlockProvider blockProvider;
 
@@ -58,7 +50,6 @@ public class YAIM
         LanguageRegistry.addName(blockProvider, "Provider");
 
         new Content().init();
-        if (event.getSide().isClient()) ClientHandler.init();
     }
 
     @Mod.EventHandler

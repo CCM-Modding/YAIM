@@ -2,7 +2,6 @@ package ccm.yaim.parts;
 
 import ccm.yaim.network.INetwork;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
 /**

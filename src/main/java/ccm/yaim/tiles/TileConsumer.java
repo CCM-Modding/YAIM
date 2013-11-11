@@ -33,7 +33,7 @@ public class TileConsumer extends TileNetworkPart implements IPowerConsumer
     @Override
     public SINumber getPowerRequirement()
     {
-        return new SINumber(POWER, 100);
+        return new SINumber(POWER, 1000);
     }
 
     @Override

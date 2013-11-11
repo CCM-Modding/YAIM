@@ -1,7 +1,6 @@
 package ccm.yaim.parts;
 
 import ccm.yaim.util.SINumber;
-import ccm.yaim.util.TheMetricSystem;
 
 /**
  * Use for TEs that provide power.

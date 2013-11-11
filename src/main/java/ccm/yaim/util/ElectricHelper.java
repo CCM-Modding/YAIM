@@ -1,6 +1,5 @@
 package ccm.yaim.util;
 
-import ccm.yaim.multipart.Content;
 import ccm.yaim.parts.INetworkPart;
 import codechicken.lib.vec.BlockCoord;
 import codechicken.multipart.TMultiPart;
@@ -35,12 +34,9 @@ public class ElectricHelper
             }
         }
 
-        if (voltage != null && resistance != null)
-            return SINumber.getMostAppropriate(TheMetricSystem.Unit.CURRENT, voltage.getValue() / resistance.getValue());
-        else if (voltage != null && power != null)
-            return SINumber.getMostAppropriate(TheMetricSystem.Unit.CURRENT, power.getValue() / voltage.getValue());
-        else
-            throw new IllegalArgumentException("I can't make up numbers...");
+        if (voltage != null && resistance != null) return SINumber.getMostAppropriate(TheMetricSystem.Unit.CURRENT, voltage.getValue() / resistance.getValue());
+        else if (voltage != null && power != null) return SINumber.getMostAppropriate(TheMetricSystem.Unit.CURRENT, power.getValue() / voltage.getValue());
+        else throw new IllegalArgumentException("I can't make up numbers...");
     }
 
     public static INetworkPart[] getAdjacentParts(World world, BlockCoord origin)
@@ -52,8 +48,7 @@ public class ElectricHelper
             BlockCoord coord = origin.copy().offset(i);
             TileEntity te = world.getBlockTileEntity(coord.x, coord.y, coord.z);
 
-            if (containsCable(te))
-                adjacentParts[i] = getCable(te);
+            if (containsCable(te)) adjacentParts[i] = getCable(te);
         }
         return adjacentParts;
     }
@@ -70,8 +65,7 @@ public class ElectricHelper
 
             for (TMultiPart t : tem.jPartList())
             {
-                if (t instanceof INetworkPart)
-                    return true;
+                if (t instanceof INetworkPart) return true;
             }
         }
         return false;
@@ -89,8 +83,7 @@ public class ElectricHelper
 
             for (TMultiPart t : tem.jPartList())
             {
-                if (t instanceof INetworkPart)
-                    return (INetworkPart) t;
+                if (t instanceof INetworkPart) return (INetworkPart) t;
             }
         }
         return null;

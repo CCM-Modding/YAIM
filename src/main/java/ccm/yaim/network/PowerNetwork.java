@@ -1,23 +1,17 @@
 package ccm.yaim.network;
 
-import ccm.yaim.parts.IConductor;
 import ccm.yaim.parts.INetworkPart;
 import ccm.yaim.parts.IPowerConsumer;
 import ccm.yaim.parts.IPowerProvider;
-import ccm.yaim.util.ElectricHelper;
 import ccm.yaim.util.SINumber;
 import ccm.yaim.util.TheMetricSystem;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.TreeMultimap;
-import net.minecraft.block.Block;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 
 import java.util.*;
 
 public class PowerNetwork implements INetwork
 {
-    private final HashSet<INetworkPart> parts  = new HashSet<INetworkPart>();
+    private final HashSet<INetworkPart> parts = new HashSet<INetworkPart>();
     //private final HashSet<IConductor>     conductors = new HashSet<IConductor>();
     //private final HashSet<IPowerConsumer> consumers  = new HashSet<IPowerConsumer>();
     //private final HashSet<IPowerProvider> providers  = new HashSet<IPowerProvider>();
@@ -66,8 +60,7 @@ public class PowerNetwork implements INetwork
         if (world.isRemote) return;
         parts.remove(part);
 
-        if (isEmpty())
-            NetworkTicker.INSTANCE.removeNetwork(this);
+        if (isEmpty()) NetworkTicker.INSTANCE.removeNetwork(this);
     }
 
     @Override
@@ -121,8 +114,7 @@ public class PowerNetwork implements INetwork
                     if (!provider.getMaxPower().equals(voltage))
                     {
                         if (voltage == null) voltage = provider.getVoltage().clone();
-                        else if (provider.getMaxPower().getValue() > voltage.getValue())
-                            voltage = provider.getVoltage().clone();
+                        else if (provider.getMaxPower().getValue() > voltage.getValue()) voltage = provider.getVoltage().clone();
                     }
                 }
             }
@@ -137,7 +129,7 @@ public class PowerNetwork implements INetwork
     {
         if (world.isRemote) return;
         for (INetworkPart part : partsToAdd)
-            add(part);
+        { add(part); }
     }
 
     @Override
@@ -158,9 +150,9 @@ public class PowerNetwork implements INetwork
         {
             if (part instanceof IPowerProvider)
             {
-                if (((IPowerProvider)part).getVoltage().equals(getVoltage()))
+                if (((IPowerProvider) part).getVoltage().equals(getVoltage()))
                 {
-                    usefullProviders.add((IPowerProvider)part);
+                    usefullProviders.add((IPowerProvider) part);
                 }
             }
             if (part instanceof IPowerConsumer)
@@ -205,8 +197,7 @@ public class PowerNetwork implements INetwork
             request.usePower(requestedPower.subtract(powerLeftInReqest));
         }
 
-        if (powerLeftInProvider != maxPower.getValue())
-            provider.providePower(maxPower.subtract(powerLeftInProvider));
+        if (powerLeftInProvider != maxPower.getValue()) provider.providePower(maxPower.subtract(powerLeftInProvider));
     }
 
     @Override

@@ -2,7 +2,6 @@ package ccm.yaim.network;
 
 import ccm.yaim.util.Data;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.IScheduledTickHandler;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 
@@ -11,10 +10,10 @@ import java.util.HashSet;
 
 public class NetworkTicker implements ITickHandler
 {
-    public static final NetworkTicker INSTANCE = new NetworkTicker();
-    private HashSet<INetwork> networks = new HashSet<INetwork>();
-    private HashSet<INetwork> add = new HashSet<INetwork>();
-    private HashSet<INetwork> del = new HashSet<INetwork>();
+    public static final NetworkTicker     INSTANCE = new NetworkTicker();
+    private             HashSet<INetwork> networks = new HashSet<INetwork>();
+    private             HashSet<INetwork> add      = new HashSet<INetwork>();
+    private             HashSet<INetwork> del      = new HashSet<INetwork>();
 
     @Override
     public void tickStart(EnumSet<TickType> type, Object... tickData)
@@ -27,8 +26,7 @@ public class NetworkTicker implements ITickHandler
         for (INetwork network : networks)
         {
             if (network.isEmpty()) del.add(network);
-            if (network.getWorld().equals(tickData[0]))
-                network.tick();
+            if (network.getWorld().equals(tickData[0])) network.tick();
         }
     }
 

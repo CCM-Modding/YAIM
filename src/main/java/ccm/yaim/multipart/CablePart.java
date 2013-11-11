@@ -1,34 +1,29 @@
 package ccm.yaim.multipart;
 
 import ccm.yaim.YAIM;
-import ccm.yaim.client.model.WireSmall;
+import ccm.yaim.model.WireSmall;
 import ccm.yaim.network.INetwork;
 import ccm.yaim.network.PowerNetwork;
 import ccm.yaim.parts.IConductor;
 import ccm.yaim.parts.INetworkPart;
-import ccm.yaim.tiles.TileNetworkPart;
 import ccm.yaim.util.ElectricHelper;
 import ccm.yaim.util.SINumber;
 import codechicken.lib.lighting.LazyLightMatrix;
 import codechicken.lib.raytracer.IndexedCuboid6;
 import codechicken.lib.vec.BlockCoord;
 import codechicken.lib.vec.Cuboid6;
-import codechicken.lib.vec.Transformation;
 import codechicken.lib.vec.Vector3;
-import codechicken.microblock.IHollowConnect;
-import codechicken.multipart.JCuboidPart;
 import codechicken.multipart.TMultiPart;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeDirection;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -41,13 +36,8 @@ import static ccm.yaim.util.TheMetricSystem.Unit.RESISTANCE;
 
 public class CablePart extends TMultiPart implements IConductor
 {
-    private INetwork       network;
-    WireSmall wireSmall = new WireSmall();
-    private ResourceLocation wireSmallResource = new ResourceLocation("yaim:textures/models/wire_small.png");
-
-    public CablePart()
-    {
-    }
+    private INetwork network;
+    INetworkPart[] adjacentParts;
 
     @Override
     @SideOnly(Side.CLIENT)
@@ -61,20 +51,12 @@ public class CablePart extends TMultiPart implements IConductor
     public void renderDynamic(Vector3 pos, float frame, int pass)
     {
         GL11.glPushMatrix();
-        Minecraft.getMinecraft().renderEngine.bindTexture(wireSmallResource);
+        Minecraft.getMinecraft().renderEngine.bindTexture(WireSmall.INSTANCE.getTexture());
         GL11.glTranslatef((float) pos.x + 0.5F, (float) pos.y + 1.5F, (float) pos.z + 0.5F);
         GL11.glScalef(1.0F, -1F, -1F);
-        wireSmall.renderCenter();
-
+        WireSmall.INSTANCE.renderCenter();
         INetworkPart[] networkParts = this.getAdjacentParts();
-
-        if (networkParts[0] != null) wireSmall.renderBottom();
-        if (networkParts[1] != null) wireSmall.renderTop();
-        if (networkParts[2] != null) wireSmall.renderNorth();
-        if (networkParts[3] != null) wireSmall.renderSouth();
-        if (networkParts[4] != null) wireSmall.renderWest();
-        if (networkParts[5] != null) wireSmall.renderEast();
-
+        for (int i = 0; i < 6; i++) if (networkParts[i] != null) WireSmall.INSTANCE.renderSide(ForgeDirection.getOrientation(i));
         GL11.glPopMatrix();
     }
 
@@ -93,13 +75,13 @@ public class CablePart extends TMultiPart implements IConductor
         double size = 0.4;
         ArrayList<Cuboid6> list = new ArrayList<Cuboid6>();
         INetworkPart[] networkParts = this.getAdjacentParts();
-        list.add(new Cuboid6(size, size, size, 1-size, 1-size, 1-size));
-        if (networkParts[0] != null) list.add(new Cuboid6(size, 0, size, 1-size, 1-size, 1-size));
-        if (networkParts[1] != null) list.add(new Cuboid6(size, size, size, 1-size, 1, 1-size));
-        if (networkParts[2] != null) list.add(new Cuboid6(size, size, 0, 1-size, 1-size, 1-size));
-        if (networkParts[3] != null) list.add(new Cuboid6(size, size, size, 1-size, 1-size, 1));
-        if (networkParts[4] != null) list.add(new Cuboid6(0, size, size, 1-size, 1-size, 1-size));
-        if (networkParts[5] != null) list.add(new Cuboid6(size, size, size, 1, 1-size, 1-size));
+        list.add(new Cuboid6(size, size, size, 1 - size, 1 - size, 1 - size));
+        if (networkParts[0] != null) list.add(new Cuboid6(size, 0, size, 1 - size, 1 - size, 1 - size));
+        if (networkParts[1] != null) list.add(new Cuboid6(size, size, size, 1 - size, 1, 1 - size));
+        if (networkParts[2] != null) list.add(new Cuboid6(size, size, 0, 1 - size, 1 - size, 1 - size));
+        if (networkParts[3] != null) list.add(new Cuboid6(size, size, size, 1 - size, 1 - size, 1));
+        if (networkParts[4] != null) list.add(new Cuboid6(0, size, size, 1 - size, 1 - size, 1 - size));
+        if (networkParts[5] != null) list.add(new Cuboid6(size, size, size, 1, 1 - size, 1 - size));
 
         return list;
     }
@@ -111,13 +93,13 @@ public class CablePart extends TMultiPart implements IConductor
         INetworkPart[] networkParts = this.getAdjacentParts();
         ArrayList<IndexedCuboid6> list = new ArrayList<IndexedCuboid6>();
 
-        list.add(new IndexedCuboid6(0, new Cuboid6(size, size, size, 1-size, 1-size, 1-size)));
-        if (networkParts[0] != null) list.add(new IndexedCuboid6(0, new Cuboid6(size, 0, size, 1-size, 1-size, 1-size)));
-        if (networkParts[1] != null) list.add(new IndexedCuboid6(0, new Cuboid6(size, size, size, 1-size, 1, 1-size)));
-        if (networkParts[2] != null) list.add(new IndexedCuboid6(0, new Cuboid6(size, size, 0, 1-size, 1-size, 1-size)));
-        if (networkParts[3] != null) list.add(new IndexedCuboid6(0, new Cuboid6(size, size, size, 1-size, 1-size, 1)));
-        if (networkParts[4] != null) list.add(new IndexedCuboid6(0, new Cuboid6(0, size, size, 1-size, 1-size, 1-size)));
-        if (networkParts[5] != null) list.add(new IndexedCuboid6(0, new Cuboid6(size, size, size, 1, 1-size, 1-size)));
+        list.add(new IndexedCuboid6(0, new Cuboid6(size, size, size, 1 - size, 1 - size, 1 - size)));
+        if (networkParts[0] != null) list.add(new IndexedCuboid6(0, new Cuboid6(size, 0, size, 1 - size, 1 - size, 1 - size)));
+        if (networkParts[1] != null) list.add(new IndexedCuboid6(0, new Cuboid6(size, size, size, 1 - size, 1, 1 - size)));
+        if (networkParts[2] != null) list.add(new IndexedCuboid6(0, new Cuboid6(size, size, 0, 1 - size, 1 - size, 1 - size)));
+        if (networkParts[3] != null) list.add(new IndexedCuboid6(0, new Cuboid6(size, size, size, 1 - size, 1 - size, 1)));
+        if (networkParts[4] != null) list.add(new IndexedCuboid6(0, new Cuboid6(0, size, size, 1 - size, 1 - size, 1 - size)));
+        if (networkParts[5] != null) list.add(new IndexedCuboid6(0, new Cuboid6(size, size, size, 1, 1 - size, 1 - size)));
 
         return list;
     }
@@ -156,8 +138,8 @@ public class CablePart extends TMultiPart implements IConductor
     public INetworkPart[] getAdjacentParts()
     {
         if (this.tile() == null) return new INetworkPart[6];
-
-        return ElectricHelper.getAdjacentParts(world(), new BlockCoord(this.x(), this.y(), this.z()));
+        if (adjacentParts == null) adjacentParts = ElectricHelper.getAdjacentParts(world(), new BlockCoord(this.x(), this.y(), this.z()));
+        return adjacentParts;
     }
 
     @Override
@@ -193,6 +175,7 @@ public class CablePart extends TMultiPart implements IConductor
     @Override
     public void update()
     {
+        adjacentParts = null;
         for (INetworkPart part : getAdjacentParts())
         {
             if (part != null)
