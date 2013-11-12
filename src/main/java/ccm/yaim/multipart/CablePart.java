@@ -12,14 +12,22 @@ import codechicken.lib.lighting.LazyLightMatrix;
 import codechicken.lib.raytracer.IndexedCuboid6;
 import codechicken.lib.vec.BlockCoord;
 import codechicken.lib.vec.Cuboid6;
+import codechicken.lib.vec.Rotation;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.IHollowConnect;
+import codechicken.multipart.JNormalOcclusion;
+import codechicken.multipart.NormalOcclusionTest;
 import codechicken.multipart.TMultiPart;
+import codechicken.multipart.TileMultipart;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import mrtjp.projectred.api.IConnectable;
+import mrtjp.projectred.core.BasicUtils;
+import mrtjp.projectred.transmission.WirePart;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
@@ -29,16 +37,61 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import static ccm.yaim.util.TheMetricSystem.Prefix.YOTTA;
 import static ccm.yaim.util.TheMetricSystem.Unit.CURRENT;
 import static ccm.yaim.util.TheMetricSystem.Unit.RESISTANCE;
 
-public class CablePart extends TMultiPart implements IConductor, IHollowConnect
+public class CablePart extends TMultiPart implements IConductor, IHollowConnect, JNormalOcclusion
 {
+    private static int expandBounds = -1;
+    public static Cuboid6[] boundingBoxes = new Cuboid6[7];
     private INetwork network;
-    INetworkPart[] adjacentParts;
+    boolean[] connectionMap = new boolean[6];
+
+    static
+    {
+        double w = 0.1;
+        boundingBoxes[6] = new Cuboid6(0.5-w, 0.5-w, 0.5-w, 0.5+w, 0.5+w, 0.5+w);
+        for(int s = 0; s < 6; s++)
+        {
+            boundingBoxes[s] = new Cuboid6(0.5-w, 0, 0.5-w, 0.5+w, 0.5-w, 0.5+w).apply(Rotation.sideRotations[s].at(Vector3.center));
+        }
+    }
+
+    @Override
+    public Iterable<Cuboid6> getOcclusionBoxes()
+    {
+        if(expandBounds >= 0)
+            return Arrays.asList(boundingBoxes[expandBounds]);
+
+        return Arrays.asList(boundingBoxes[6]);
+    }
+
+    @Override
+    public Iterable<Cuboid6> getCollisionBoxes()
+    {
+        LinkedList<Cuboid6> list = new LinkedList<Cuboid6>();
+        list.add(boundingBoxes[6]);
+        for(int s = 0; s < 6; s++)
+        {
+            if(connectionMap[s])
+                list.add(boundingBoxes[s]);
+        }
+        return list;
+    }
+
+    @Override
+    public Iterable<IndexedCuboid6> getSubParts()
+    {
+        Iterable<Cuboid6> boxList = getCollisionBoxes();
+        LinkedList<IndexedCuboid6> partList = new LinkedList<IndexedCuboid6>();
+        for(Cuboid6 c : boxList)
+            partList.add(new IndexedCuboid6(0, c));
+        return partList;
+    }
 
     @Override
     @SideOnly(Side.CLIENT)
@@ -56,8 +109,7 @@ public class CablePart extends TMultiPart implements IConductor, IHollowConnect
         GL11.glTranslatef((float) pos.x + 0.5F, (float) pos.y + 1.5F, (float) pos.z + 0.5F);
         GL11.glScalef(1.0F, -1F, -1F);
         WireSmall.INSTANCE.renderCenter();
-        INetworkPart[] networkParts = this.getAdjacentParts();
-        for (int i = 0; i < 6; i++) if (networkParts[i] != null) WireSmall.INSTANCE.renderSide(ForgeDirection.getOrientation(i));
+        for (int i = 0; i < 6; i++) if (connectionMap[i]) WireSmall.INSTANCE.renderSide(ForgeDirection.getOrientation(i));
         GL11.glPopMatrix();
     }
 
@@ -71,38 +123,9 @@ public class CablePart extends TMultiPart implements IConductor, IHollowConnect
     }
 
     @Override
-    public List<Cuboid6> getCollisionBoxes()
+    public boolean occlusionTest(TMultiPart npart)
     {
-        double size = 0.4;
-        ArrayList<Cuboid6> list = new ArrayList<Cuboid6>();
-        INetworkPart[] networkParts = this.getAdjacentParts();
-        list.add(new Cuboid6(size, size, size, 1 - size, 1 - size, 1 - size));
-        if (networkParts[0] != null) list.add(new Cuboid6(size, 0, size, 1 - size, 1 - size, 1 - size));
-        if (networkParts[1] != null) list.add(new Cuboid6(size, size, size, 1 - size, 1, 1 - size));
-        if (networkParts[2] != null) list.add(new Cuboid6(size, size, 0, 1 - size, 1 - size, 1 - size));
-        if (networkParts[3] != null) list.add(new Cuboid6(size, size, size, 1 - size, 1 - size, 1));
-        if (networkParts[4] != null) list.add(new Cuboid6(0, size, size, 1 - size, 1 - size, 1 - size));
-        if (networkParts[5] != null) list.add(new Cuboid6(size, size, size, 1, 1 - size, 1 - size));
-
-        return list;
-    }
-
-    @Override
-    public List<IndexedCuboid6> getSubParts()
-    {
-        double size = 0.4;
-        INetworkPart[] networkParts = this.getAdjacentParts();
-        ArrayList<IndexedCuboid6> list = new ArrayList<IndexedCuboid6>();
-
-        list.add(new IndexedCuboid6(0, new Cuboid6(size, size, size, 1 - size, 1 - size, 1 - size)));
-        if (networkParts[0] != null) list.add(new IndexedCuboid6(0, new Cuboid6(size, 0, size, 1 - size, 1 - size, 1 - size)));
-        if (networkParts[1] != null) list.add(new IndexedCuboid6(0, new Cuboid6(size, size, size, 1 - size, 1, 1 - size)));
-        if (networkParts[2] != null) list.add(new IndexedCuboid6(0, new Cuboid6(size, size, 0, 1 - size, 1 - size, 1 - size)));
-        if (networkParts[3] != null) list.add(new IndexedCuboid6(0, new Cuboid6(size, size, size, 1 - size, 1 - size, 1)));
-        if (networkParts[4] != null) list.add(new IndexedCuboid6(0, new Cuboid6(0, size, size, 1 - size, 1 - size, 1 - size)));
-        if (networkParts[5] != null) list.add(new IndexedCuboid6(0, new Cuboid6(size, size, size, 1, 1 - size, 1 - size)));
-
-        return list;
+        return NormalOcclusionTest.apply(this, npart);
     }
 
     @Override
@@ -138,9 +161,9 @@ public class CablePart extends TMultiPart implements IConductor, IHollowConnect
     @Override
     public INetworkPart[] getAdjacentParts()
     {
-        if (this.tile() == null) return new INetworkPart[6];
-        if (adjacentParts == null) adjacentParts = ElectricHelper.getAdjacentParts(world(), new BlockCoord(this.x(), this.y(), this.z()));
-        return adjacentParts;
+        //if (this.tile() == null) return new INetworkPart[6];
+        //if (adjacentParts == null) adjacentParts = ElectricHelper.getAdjacentParts(world(), new BlockCoord(this.x(), this.y(), this.z()));
+        return new INetworkPart[6];
     }
 
     @Override
@@ -174,16 +197,50 @@ public class CablePart extends TMultiPart implements IConductor, IHollowConnect
     }
 
     @Override
+    public void onPartChanged(TMultiPart part)
+    {
+        update();
+    }
+
+    @Override
     public void update()
     {
-        adjacentParts = null;
-        for (INetworkPart part : getAdjacentParts())
+        for(int s = 0; s < 6; s++)
+            connectionMap[s] = connectionPossible(s) && connectionMade(s);
+    }
+
+    public boolean connectionMade(int s)
+    {
+        BlockCoord pos = new BlockCoord(tile()).offset(s);
+        TileEntity te = world().getBlockTileEntity(pos.x, pos.y, pos.z);
+        if (te != null && te instanceof TileMultipart)
         {
-            if (part != null)
-            {
-                getNetwork().merge(part.getNetwork());
-            }
+            for (TMultiPart tp : ((TileMultipart)te).jPartList())
+                if (tp instanceof CablePart)
+                {
+                    return ((CablePart) tp).canConnect(s ^ 1);
+                }
         }
+        return false;
+    }
+
+    private boolean canConnect(int i)
+    {
+        return connectionPossible(i);
+    }
+
+
+    public boolean connectionPossible(int s)
+    {
+        TMultiPart facePart = tile().partMap(s);
+        if(facePart == null)
+            return true;
+
+        expandBounds = s;
+        boolean fits = tile().canReplacePart(this, this);
+        expandBounds = -1;
+
+        return fits;
     }
 
     @Override
