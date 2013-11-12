@@ -13,6 +13,7 @@ import codechicken.lib.raytracer.IndexedCuboid6;
 import codechicken.lib.vec.BlockCoord;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
+import codechicken.microblock.IHollowConnect;
 import codechicken.multipart.TMultiPart;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -34,7 +35,7 @@ import static ccm.yaim.util.TheMetricSystem.Prefix.YOTTA;
 import static ccm.yaim.util.TheMetricSystem.Unit.CURRENT;
 import static ccm.yaim.util.TheMetricSystem.Unit.RESISTANCE;
 
-public class CablePart extends TMultiPart implements IConductor
+public class CablePart extends TMultiPart implements IConductor, IHollowConnect
 {
     private INetwork network;
     INetworkPart[] adjacentParts;
@@ -207,5 +208,14 @@ public class CablePart extends TMultiPart implements IConductor
     public void melt()
     {
 
+    }
+
+    /**
+     * @return The size (width and height) of the connection in pixels. Must be be less than 12 and more than 0
+     */
+    @Override
+    public int getHollowSize()
+    {
+        return 12;
     }
 }
