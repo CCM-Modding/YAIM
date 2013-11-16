@@ -64,7 +64,7 @@ public class CablePart extends TMultiPart implements IConductor, IHollowConnect,
     @Override
     public Iterable<Cuboid6> getOcclusionBoxes()
     {
-        if(expandBounds >= 0)
+        if(expandBounds != -1)
             return Arrays.asList(boundingBoxes[expandBounds]);
 
         return Arrays.asList(boundingBoxes[6]);
@@ -161,9 +161,11 @@ public class CablePart extends TMultiPart implements IConductor, IHollowConnect,
     @Override
     public INetworkPart[] getAdjacentParts()
     {
-        //if (this.tile() == null) return new INetworkPart[6];
-        //if (adjacentParts == null) adjacentParts = ElectricHelper.getAdjacentParts(world(), new BlockCoord(this.x(), this.y(), this.z()));
-        return new INetworkPart[6];
+        if (this.tile() == null) return new INetworkPart[6];
+        INetworkPart[] adjacentParts = new INetworkPart[6];
+        for(int s = 0; s < 6; s++)
+            adjacentParts[s] = connectionPossible(s) ? ElectricHelper.getPartOnSide(world(), x(), y(), z(), s) : null;
+        return adjacentParts;
     }
 
     @Override
@@ -207,19 +209,30 @@ public class CablePart extends TMultiPart implements IConductor, IHollowConnect,
     {
         for(int s = 0; s < 6; s++)
             connectionMap[s] = connectionPossible(s) && connectionMade(s);
+
+        if (network != null) network.refresh();
     }
 
     public boolean connectionMade(int s)
     {
         BlockCoord pos = new BlockCoord(tile()).offset(s);
         TileEntity te = world().getBlockTileEntity(pos.x, pos.y, pos.z);
-        if (te != null && te instanceof TileMultipart)
+        if (te != null)
         {
-            for (TMultiPart tp : ((TileMultipart)te).jPartList())
-                if (tp instanceof CablePart)
+            if (te instanceof TileMultipart)
+            {
+                for (TMultiPart tp : ((TileMultipart)te).jPartList())
                 {
-                    return ((CablePart) tp).canConnect(s ^ 1);
+                    if (tp instanceof CablePart)
+                    {
+                        return ((CablePart) tp).canConnect(s ^ 1);
+                    }
                 }
+            }
+            else if (te instanceof INetworkPart)
+            {
+                return true;
+            }
         }
         return false;
     }
@@ -228,7 +241,6 @@ public class CablePart extends TMultiPart implements IConductor, IHollowConnect,
     {
         return connectionPossible(i);
     }
-
 
     public boolean connectionPossible(int s)
     {

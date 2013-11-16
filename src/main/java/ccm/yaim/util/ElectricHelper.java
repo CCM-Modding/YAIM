@@ -6,6 +6,7 @@ import codechicken.multipart.TMultiPart;
 import codechicken.multipart.TileMultipart;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeDirection;
 
 public class ElectricHelper
 {
@@ -87,5 +88,10 @@ public class ElectricHelper
             }
         }
         return null;
+    }
+
+    public static INetworkPart getPartOnSide(World world, int x, int y, int z, int s)
+    {
+        return getCable(world.getBlockTileEntity(x + ForgeDirection.VALID_DIRECTIONS[s].offsetX, y + ForgeDirection.VALID_DIRECTIONS[s].offsetY, z + ForgeDirection.VALID_DIRECTIONS[s].offsetZ));
     }
 }
