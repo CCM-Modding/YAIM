@@ -7,7 +7,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.world.World;
 
-import static ccm.yaim.util.TheMetricSystem.Prefix.KILO;
 import static ccm.yaim.util.TheMetricSystem.Prefix.MEGA;
 import static ccm.yaim.util.TheMetricSystem.Unit.POWER;
 import static ccm.yaim.util.TheMetricSystem.Unit.VOLTAGE;

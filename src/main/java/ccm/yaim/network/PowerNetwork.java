@@ -27,7 +27,6 @@ public class PowerNetwork implements INetwork
     }
 
 
-
     public SINumber getVoltage()
     {
         return voltage.clone();

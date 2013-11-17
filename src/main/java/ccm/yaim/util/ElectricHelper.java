@@ -92,6 +92,8 @@ public class ElectricHelper
 
     public static INetworkPart getPartOnSide(World world, int x, int y, int z, int s)
     {
-        return getCable(world.getBlockTileEntity(x + ForgeDirection.VALID_DIRECTIONS[s].offsetX, y + ForgeDirection.VALID_DIRECTIONS[s].offsetY, z + ForgeDirection.VALID_DIRECTIONS[s].offsetZ));
+        return getCable(world.getBlockTileEntity(x + ForgeDirection.VALID_DIRECTIONS[s].offsetX,
+                y + ForgeDirection.VALID_DIRECTIONS[s].offsetY,
+                z + ForgeDirection.VALID_DIRECTIONS[s].offsetZ));
     }
 }
