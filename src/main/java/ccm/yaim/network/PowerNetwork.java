@@ -26,6 +26,8 @@ public class PowerNetwork implements INetwork
         NetworkTicker.INSTANCE.addNetwork(this);
     }
 
+
+
     public SINumber getVoltage()
     {
         return voltage.clone();

@@ -26,6 +26,7 @@ import mrtjp.projectred.core.BasicUtils;
 import mrtjp.projectred.transmission.WirePart;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatMessageComponent;
@@ -64,8 +65,15 @@ public class CablePart extends TMultiPart implements IConductor, IHollowConnect,
     @Override
     public Iterable<Cuboid6> getOcclusionBoxes()
     {
-        if(expandBounds != -1)
-            return Arrays.asList(boundingBoxes[expandBounds]);
+        try
+        {
+            if(expandBounds != -1)
+                return Arrays.asList(boundingBoxes[expandBounds]);
+        }
+        catch (ArrayIndexOutOfBoundsException e)
+        {
+            System.out.println("[YAIM] dafuq??");
+        }
 
         return Arrays.asList(boundingBoxes[6]);
     }
@@ -164,14 +172,19 @@ public class CablePart extends TMultiPart implements IConductor, IHollowConnect,
         if (this.tile() == null) return new INetworkPart[6];
         INetworkPart[] adjacentParts = new INetworkPart[6];
         for(int s = 0; s < 6; s++)
-            adjacentParts[s] = connectionPossible(s) ? ElectricHelper.getPartOnSide(world(), x(), y(), z(), s) : null;
+            adjacentParts[s] = connectionPossible(s) && connectionMade(s) ? ElectricHelper.getPartOnSide(world(), x(), y(), z(), s) : null;
         return adjacentParts;
     }
 
     @Override
     public void debug(World world, int x, int y, int z, EntityPlayer entityPlayer)
     {
-        entityPlayer.sendChatToPlayer(ChatMessageComponent.createFromText(this.getNetwork().toString()));
+        entityPlayer.addChatMessage(getNetwork().toString());
+        for (INetworkPart part : getAdjacentParts())
+        {
+           if (part == null) entityPlayer.addChatMessage("null");
+           else entityPlayer.addChatMessage(part.toString());
+        }
     }
 
     @Override
@@ -201,16 +214,37 @@ public class CablePart extends TMultiPart implements IConductor, IHollowConnect,
     @Override
     public void onPartChanged(TMultiPart part)
     {
+        this.getNetwork().clear();
+        this.setNetwork(new PowerNetwork(world()));
+        this.getNetwork().add(this);
+        this.getNetwork().refresh();
         update();
+        for (int i = 0; i < 6; i++)
+        {
+            INetworkPart part1 = ElectricHelper.getPartOnSide(world(), x(), y(), z(), i);
+            if (part1 != null)
+            {
+                part1.setNetwork(new PowerNetwork(world()));
+                part1.getNetwork().add(part1);
+                part1.getNetwork().refresh();
+            }
+        }
     }
 
     @Override
     public void update()
     {
         for(int s = 0; s < 6; s++)
+        {
             connectionMap[s] = connectionPossible(s) && connectionMade(s);
-
-        if (network != null) network.refresh();
+        }
+        for (INetworkPart part : getAdjacentParts())
+        {
+            if (part != null)
+            {
+                getNetwork().merge(part.getNetwork());
+            }
+        }
     }
 
     public boolean connectionMade(int s)
@@ -277,6 +311,17 @@ public class CablePart extends TMultiPart implements IConductor, IHollowConnect,
     public void melt()
     {
 
+    }
+
+    public boolean activate(EntityPlayer player, MovingObjectPosition hit, ItemStack item)
+    {
+        if (world().isRemote) return false;
+        if (item.getItem().itemID == Item.stick.itemID && !player.isSneaking())
+        {
+            debug(player.getEntityWorld(), hit.blockX, hit.blockY, hit.blockZ, player);
+            return true;
+        }
+        return false;
     }
 
     /**
