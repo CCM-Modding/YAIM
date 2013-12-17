@@ -54,6 +54,7 @@ src/main/resources/assets/basiccomponents
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
+*.cmd
 
 # Folder config file
 Desktop.ini
